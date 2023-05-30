@@ -6,7 +6,15 @@ const {
   createBootcamp,
   updateBootcamp,
   deleteBootcamp,
+  bootcampPhotoUpload,
 } = require("../controllers/bootcamps");
+const { protect, authorized } = require("../middleware/auth");
+
+// bringing in the middlewre for advanced serch
+const advancedResults = require("../middleware/advancedResults");
+
+// bring in model Bootcamp
+const Bootcamp = require("../models/Bootcamp");
 
 // Include other resource routes
 const courseRouter = require("./courses");
@@ -20,15 +28,24 @@ const router = express.Router();
 // we need to go url/bootcamps/:bootcampsId/courses
 router.use("/:bootcampId/courses", courseRouter);
 
+// for photo upload route
+// put protect to validate the token
+router
+  .route("/:id/photo")
+  .put(protect, authorized("publisher", "admin"), bootcampPhotoUpload);
+
 // creating our routes
 // can call two methods because its the same route /
-router.route("/").get(getBootcamps).post(createBootcamp);
+router
+  .route("/")
+  .get(advancedResults(Bootcamp, "courses"), getBootcamps)
+  .post(protect, authorized("publisher", "admin"), createBootcamp);
 
 router
   .route("/:id")
   .get(getBootcamp)
-  .put(updateBootcamp)
-  .delete(deleteBootcamp);
+  .put(protect, authorized("publisher", "admin"), updateBootcamp)
+  .delete(protect, authorized("publisher", "admin"), deleteBootcamp);
 /* router.get("/", (req, res) => {});
 
 router.get("/:id", (req, res) => {});
