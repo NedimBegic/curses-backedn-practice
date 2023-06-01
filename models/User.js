@@ -2,6 +2,8 @@ const mongoose = require("mongoose");
 // Bring in bcrypt but bcryptjs is working more properly
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+// it helps generate token and hash it
+const crypto = require("crypto");
 
 const UserSchema = new mongoose.Schema({
   name: {
@@ -40,6 +42,12 @@ const UserSchema = new mongoose.Schema({
 // Encrypt password using bcrypt
 // using middleware and running it before save
 UserSchema.pre("save", async function (next) {
+  // if we want to reset passwordToken
+  // we check if the password is modified if not than move along
+  if (!this.isModified("password")) {
+    next();
+  }
+
   // genSalt returns a promise
   // the higher the more secure and more hevier
   // 10 is recomanded
@@ -65,4 +73,21 @@ UserSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
+// generate and hash password token
+UserSchema.methods.getResetPasswordToken = function () {
+  // Generate token
+  // random data and formate it as a buffer we make a string
+  const resetToken = crypto.randomBytes(20).toString("hex").at;
+  // Hash token and set to resetPasswordToken field
+  // we can acces current user with this
+  // this is in node crypto doc
+  this.resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  // Set the expire
+  this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+  return resetToken;
+};
 module.exports = mongoose.model("user", UserSchema);
