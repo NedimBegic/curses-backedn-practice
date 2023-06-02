@@ -18,6 +18,7 @@ const Bootcamp = require("../models/Bootcamp");
 
 // Include other resource routes
 const courseRouter = require("./courses");
+const reviewsRouter = require("./reviews");
 
 // bring in the router
 const router = express.Router();
@@ -27,6 +28,7 @@ const router = express.Router();
 // so we in order to add relations bootcamp and courses
 // we need to go url/bootcamps/:bootcampsId/courses
 router.use("/:bootcampId/courses", courseRouter);
+router.use("/:bootcampId/reviews", reviewsRouter);
 
 // for photo upload route
 // put protect to validate the token

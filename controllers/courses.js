@@ -8,7 +8,6 @@ const Bootcamp = require("../models/Bootcamp");
 // Get all courses
 // get api/v1/courses
 // GET api/v1/bootcamp/:bootcampId/courses
-
 exports.getCourses = asyncHandler(async (req, res, next) => {
   if (req.params.bootcampId) {
     const courses = await Course.find({ bootcamp: req.params.bootcampId });
